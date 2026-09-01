@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # 允许手动点击按钮触发打包
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,12 +23,23 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+          cache-disabled: true # 关闭缓存避免 GitHub 缓存服务器偶发 400/503 报错
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          # 检查是否有 gradlew，如果没有则直接使用系统安装好的 gradle 命令打包
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Performance-Monitor-APK
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

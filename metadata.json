@@ -1,0 +1,6 @@
+{
+  "name": "性能悬浮监控",
+  "description": "实时GPU与CPU占用率、多核心温度、内存使用与历史趋势的屏幕悬浮窗监控工具",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -21,15 +21,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK Licenses & Prepare Env
+        run: |
+          yes | sdkmanager --licenses || true
+          touch .env || true
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.7'
-          cache-disabled: true # 关闭缓存避免 GitHub 缓存服务器偶发 400/503 报错
+          cache-disabled: true
 
       - name: Build Debug APK
         run: |
-          # 检查是否有 gradlew，如果没有则直接使用系统安装好的 gradle 命令打包
           if [ -f "./gradlew" ]; then
             chmod +x ./gradlew
             ./gradlew assembleDebug --no-daemon --stacktrace
@@ -37,7 +44,7 @@ jobs:
             gradle assembleDebug --no-daemon --stacktrace
           fi
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Performance-Monitor-APK
